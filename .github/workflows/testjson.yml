@@ -1,0 +1,52 @@
+name: Test json
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/testjson.yml'
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Step 1: Read matrix.json and output it
+  # ─────────────────────────────────────────────
+  prepare-matrix:
+    name: Prepare Build Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Read matrix from JSON file
+        id: set-matrix
+        run: |
+          MATRIX=$(cat ./citest/matrix.json | jq -c .)
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "Loaded matrix:"
+          echo "$MATRIX" | jq .
+
+  # ─────────────────────────────────────────────
+  # Step 2: Build on each platform
+  # ─────────────────────────────────────────────
+  build:
+    name: Build [${{ matrix.platform }} / ${{ matrix.arch }}]
+    needs: prepare-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }} 
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        
+      - name: Print platform info
+        run: |
+          echo "OS:       ${{ matrix.os }}"
+          echo "Platform: ${{ matrix.platform }}"
+          echo "Arch:     ${{ matrix.arch }}"
+          echo "Matrix:   ${{ matrix.matrix }}"
+          echo "Artifact: ${{ matrix.artifact }}"
+
