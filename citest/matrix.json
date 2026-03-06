@@ -1,0 +1,32 @@
+{
+  "include": [
+    {
+      "os": "ubuntu-latest",
+      "platform": "linux",
+      "arch": "x64",
+      "matrix": "arm-01",
+      "artifact": "linux-x64"
+    },
+    {
+      "os": "macos-15-intel",
+      "platform": "macos",
+      "arch": "x64",
+      "matrix": "other",
+      "artifact": "macos-x64"
+    },
+    {
+      "os": "windows-latest",
+      "platform": "msys2",
+      "arch": "x64",
+      "matrix": "msys2",
+      "artifact": "msys2-x64"
+    },
+    {
+      "os": "windows-latest",
+      "platform": "msvc",
+      "arch": "x64",
+      "matrix": "windows",
+      "artifact": "msvc-x64"
+    }
+  ]
+}
