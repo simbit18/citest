@@ -73,7 +73,7 @@ jobs:
       - name: Read matrix JSON
         id: set-matrix
         run: |
-          MATRIX=$(cat .github/nuttx-ci-matrix.json)
+          MATRIX=$(cat ./citest/nuttx-ci-matrix.json | jq -c .)
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
           echo "Loaded matrix:"
           echo "$MATRIX" | jq .
