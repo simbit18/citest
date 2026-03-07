@@ -75,9 +75,9 @@ jobs:
         run: |
           MATRIX=$(cat ./citest/nuttx-ci-matrix.json | jq -c .)
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
-          ROOTDIR=`pwd`
-          echo "ROOTDIR: $ROOTDIR"
-          echo "rootdir=$ROOTDIR" >> "$GITHUB_OUTPUT"
+          # ROOTDIR=`pwd`
+          # echo "ROOTDIR: $ROOTDIR"
+          #echo "rootdir=$ROOTDIR" >> "$GITHUB_OUTPUT"
           echo "Loaded matrix:"
           echo "$MATRIX" | jq .
 
@@ -100,7 +100,14 @@ jobs:
       - name: Skip non-linux entries
         if: matrix.platform != 'linux'
         run: echo "Skipping non-linux entry" && exit 0
-
+      
+      - name: Get Current ROOTDIR
+        id: rootdir
+        run: |
+          ROOTDIR=`pwd`
+          echo "ROOTDIR: $ROOTDIR"
+          echo "rootdir=$ROOTDIR" >> "$GITHUB_OUTPUT"
+      
       - name: Show Disk Space
         run: df -h
       - name: Print platform info
@@ -150,7 +157,7 @@ jobs:
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
-                ./cibuild.sh -c -A -N -R -S ${{ needs.load-matrix.outputs.rootdir }}/citest/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R -S ${{ steps.date.outputs.rootdir }}/citest/${{matrix.boards}}.dat
             fi
 
       - name: Post-build Disk Space
