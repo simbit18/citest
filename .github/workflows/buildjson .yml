@@ -145,9 +145,8 @@ jobs:
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
-                ./cibuild.sh -c -A -N -R -S testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R -S ./citest/${{matrix.boards}}.dat
             fi
-            ./tools/configure.sh -l ${{ env.BOARD_CONFIG_NAME }}
 
       - name: Post-build Disk Space
         if: always()
