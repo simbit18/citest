@@ -75,6 +75,9 @@ jobs:
         run: |
           MATRIX=$(cat ./citest/nuttx-ci-matrix.json | jq -c .)
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          ROOTDIR=`pwd`
+          echo "ROOTDIR: $ROOTDIR"
+          echo "rootdir=$ROOTDIR" >> "$GITHUB_OUTPUT"
           echo "Loaded matrix:"
           echo "$MATRIX" | jq .
 
@@ -139,6 +142,7 @@ jobs:
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             export ARTIFACTDIR=`pwd`/buildartifacts
             echo "ARTIFACTDIR: $ARTIFACTDIR"
+            echo ${{ needs.load-matrix.outputs.rootdir }}
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
             cd sources/nuttx/tools/ci
@@ -146,7 +150,7 @@ jobs:
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
-                ./cibuild.sh -c -A -N -R -S ./citest/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R -S ${{ needs.load-matrix.outputs.rootdir }}/citest/${{matrix.boards}}.dat
             fi
 
       - name: Post-build Disk Space
