@@ -150,6 +150,7 @@ jobs:
             export ARTIFACTDIR=`pwd`/buildartifacts
             echo "ARTIFACTDIR: $ARTIFACTDIR"
             echo ${{ needs.load-matrix.outputs.rootdir }}
+            echo ${{ github.workspace }}
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
             cd sources/nuttx/tools/ci
@@ -157,7 +158,7 @@ jobs:
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
-                ./cibuild.sh -c -A -N -R -S ${{ steps.date.outputs.rootdir }}/citest/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R -S ${{ github.workspace }}/citest/${{matrix.boards}}.dat
             fi
 
       - name: Post-build Disk Space
