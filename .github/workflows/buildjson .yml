@@ -98,13 +98,14 @@ jobs:
         if: matrix.platform != 'linux'
         run: echo "Skipping non-linux entry" && exit 0
 
+      - name: Show Disk Space
+        run: df -h
       - name: Print platform info
         run: |
           echo "OS:       ${{ matrix.os }}"
           echo "Platform: ${{ matrix.platform }}"
           echo "Arch:     ${{ matrix.arch }}"
-          echo "Matrix:   ${{ matrix.matrix }}"
-          echo "Artifact: ${{ matrix.artifact }}"
+          echo "Boards:   ${{ matrix.boards }}"
 
       - name: Download Source Artifact
         if: matrix.platform == 'linux'
@@ -140,7 +141,7 @@ jobs:
             echo "ARTIFACTDIR: $ARTIFACTDIR"
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
-            cd sources/nuttx/ci
+            cd sources/nuttx/tools/ci
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
