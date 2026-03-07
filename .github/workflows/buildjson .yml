@@ -51,6 +51,7 @@ jobs:
       - name: Copy dat
         run: |
           mkdir sources/citest
+          ls -la
           cp citest/*.dat sources/citest
 
       - name: Tar sources
