@@ -149,9 +149,9 @@ jobs:
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             export ARTIFACTDIR=`pwd`/buildartifacts
             echo "ARTIFACTDIR: $ARTIFACTDIR"
-            echo ${{ needs.load-matrix.outputs.rootdir }}
+            echo ${{ steps.rootdir.outputs.rootdir }}
             echo ${{ github.workspace }}
-            ls -la ${{ github.workspace }}
+            # ls -la /github/works
             ls -la /github/workspace
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
