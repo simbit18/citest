@@ -151,6 +151,7 @@ jobs:
             echo "ARTIFACTDIR: $ARTIFACTDIR"
             echo ${{ steps.rootdir.outputs.rootdir }}
             echo ${{ github.workspace }}
+            ls -la ${{ steps.rootdir.outputs.rootdir }}
             # ls -la /github/works
             ls -la /github/workspace
             git config --global --add safe.directory /github/workspace/sources/nuttx
