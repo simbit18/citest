@@ -1,0 +1,3 @@
+# Choose a subset of board/configs due to Linux builds
+
+/sim/sim/sim/configs/nsh

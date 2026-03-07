@@ -1,0 +1,161 @@
+name: Apache NuttX CI json
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/buildjson.yml'
+env:
+   REPO_NUTTX_NAME: apache/nuttx
+   REF_NUTTX_NAME: master
+   REPO_APPS_NAME: apache/nuttx-apps
+   REF_APPS_NAME: master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.event.pull_request.number }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Fetch-Source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine Target Branches
+        id: gittargets
+        shell: bash
+        run: |
+          OS_REF=""
+          APPS_REF=""
+          REF="refs/heads/master"
+          echo "Working with ref: $REF"
+      - name: Checkout nuttx repo
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.REPO_NUTTX_NAME }}
+          ref: ${{ env.REF_NUTTX_NAME }}
+          path: sources/nuttx
+          fetch-depth: 1
+      - name: Checkout nuttx repo tags
+        run: git -C sources/nuttx fetch --tags
+
+      - name: Checkout apps repo
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.REPO_APPS_NAME }}
+          ref: ${{ env.REF_APPS_NAME }}
+          path: sources/apps
+          fetch-depth: 1
+
+      - name: Tar sources
+        run: tar zcf sources.tar.gz sources
+
+      - name: Archive Source Bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: source-bundle
+          path: sources.tar.gz
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 1 – Load the build matrix from JSON
+  # ─────────────────────────────────────────────────────────────
+  load-matrix:
+    name: Load Build Matrix
+    needs: Fetch-Source
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout NuttX
+        uses: actions/checkout@v6
+
+      - name: Read matrix JSON
+        id: set-matrix
+        run: |
+          MATRIX=$(cat .github/nuttx-ci-matrix.json)
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "Loaded matrix:"
+          echo "$MATRIX" | jq .
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 2 – Build (Linux runners)
+  # ─────────────────────────────────────────────────────────────
+  build-linux:
+    name: "Linux | ${{ matrix.arch }} | ${{ matrix.boards }}"
+    needs: load-matrix
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+
+    if: ${{ fromJson(needs.load-matrix.outputs.matrix) != '' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Skip non-linux entries
+        if: matrix.platform != 'linux'
+        run: echo "Skipping non-linux entry" && exit 0
+
+      - name: Print platform info
+        run: |
+          echo "OS:       ${{ matrix.os }}"
+          echo "Platform: ${{ matrix.platform }}"
+          echo "Arch:     ${{ matrix.arch }}"
+          echo "Matrix:   ${{ matrix.matrix }}"
+          echo "Artifact: ${{ matrix.artifact }}"
+
+      - name: Download Source Artifact
+        if: matrix.platform == 'linux'
+        uses: actions/download-artifact@v7
+        with:
+          name: source-bundle
+          path: .
+
+      - name: Extract sources
+        run: tar zxf sources.tar.gz
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker Pull
+        run: docker pull ghcr.io/apache/nuttx/apache-nuttx-ci-linux
+
+      - name: Export NuttX Repo SHA
+        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
+
+      - name: Run builds
+        uses: ./sources/nuttx/.github/actions/ci-container
+        env:
+          BLOBDIR: /tools/blobs
+        with:
+          run: |
+            echo "::add-matcher::sources/nuttx/.github/gcc.json"
+            export ARTIFACTDIR=`pwd`/buildartifacts
+            echo "ARTIFACTDIR: $ARTIFACTDIR"
+            git config --global --add safe.directory /github/workspace/sources/nuttx
+            git config --global --add safe.directory /github/workspace/sources/apps
+            cd sources/nuttx/ci
+            if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
+                ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
+            else
+                ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
+                ./cibuild.sh -c -A -N -R -S testlist/${{matrix.boards}}.dat
+            fi
+            ./tools/configure.sh -l ${{ env.BOARD_CONFIG_NAME }}
+
+      - name: Post-build Disk Space
+        if: always()
+        run: df -h
+
+      - uses: actions/upload-artifact@v7.0.0
+        if: ${{ always() }}
+        with:
+          name: linux-${{matrix.boards}}-builds
+          path: buildartifacts/
+        continue-on-error: true

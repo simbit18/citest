@@ -1,0 +1,10 @@
+{
+  "include": [
+    { "os": "ubuntu-latest",  "platform": "linux",  "arch": "arm",     "boards": "arm-15" },
+    { "os": "ubuntu-latest",  "platform": "linux",  "arch": "xtensa",  "boards": "arm-16" },
+    { "os": "ubuntu-latest",  "platform": "linux",  "arch": "sim",     "boards": "sim-04" },
+    { "os": "macos-15-intel", "platform": "macos",  "arch": "arm",     "boards": "macos-01" },
+    { "os": "windows-latest", "platform": "msys2",  "arch": "risc-v",  "boards": "msys2-01" },
+    { "os": "windows-latest", "platform": "msvc",   "arch": "xtensa",  "boards": "windowos" }
+  ]
+}
