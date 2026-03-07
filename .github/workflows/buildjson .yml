@@ -48,6 +48,10 @@ jobs:
           path: sources/apps
           fetch-depth: 1
 
+      - name: Copy dat
+          mkdir sources/citest
+          cp citest/*.dat sources/citest
+
       - name: Tar sources
         run: tar zcf sources.tar.gz sources
 
@@ -151,7 +155,7 @@ jobs:
             echo "ARTIFACTDIR: $ARTIFACTDIR"
             echo ${{ steps.rootdir.outputs.rootdir }}
             echo ${{ github.workspace }}
-            ls -la ${{ steps.rootdir.outputs.rootdir }}
+            # ls -la ${{ steps.rootdir.outputs.rootdir }}
             # ls -la /github/works
             ls -la /github/workspace
             git config --global --add safe.directory /github/workspace/sources/nuttx
@@ -161,7 +165,7 @@ jobs:
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
-                ./cibuild.sh -c -A -N -R -S ${{ github.workspace }}/citest/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R -S sources/citest/${{matrix.boards}}.dat
             fi
 
       - name: Post-build Disk Space
