@@ -59,6 +59,7 @@ jobs:
         run: |
           tar zcf sources.tar.gz sources
           ls -la sources
+          ls -la sources/citest
 
       - name: Archive Source Bundle
         uses: actions/upload-artifact@v7
@@ -136,8 +137,8 @@ jobs:
       - name: Extract sources
         run: |
           tar zxf sources.tar.gz
-          ls -la source
-          ls -la source/citest
+          ls -la sources
+          ls -la sources/citest
 
       - name: Docker Login
         uses: docker/login-action@v3
@@ -173,7 +174,7 @@ jobs:
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
-                ./cibuild.sh -c -A -N -R -S ./sources/citest/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R -S sources/citest/${{matrix.boards}}.dat
             fi
 
       - name: Post-build Disk Space
