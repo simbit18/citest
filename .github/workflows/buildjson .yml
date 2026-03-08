@@ -56,7 +56,9 @@ jobs:
              citest
 
       - name: Tar sources
-        run: tar zcf sources.tar.gz sources
+        run: |
+          tar zcf sources.tar.gz sources
+          ls -la sources
 
       - name: Archive Source Bundle
         uses: actions/upload-artifact@v7
@@ -134,7 +136,8 @@ jobs:
       - name: Extract sources
         run: |
           tar zxf sources.tar.gz
-          ls -la
+          ls -la source
+          ls -la source/citest
 
       - name: Docker Login
         uses: docker/login-action@v3
