@@ -51,7 +51,6 @@ jobs:
       - name: Copy dat
         uses: actions/checkout@v6
         with:
-          path: sources
           sparse-checkout: |
              citestlist
 
@@ -59,7 +58,7 @@ jobs:
         run: |
           tar zcf sources.tar.gz sources
           ls -la sources
-          ls -la sources/citest
+          ls -la sources/citestlist
 
       - name: Archive Source Bundle
         uses: actions/upload-artifact@v7
