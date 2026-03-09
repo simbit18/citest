@@ -169,8 +169,10 @@ jobs:
             # ls -la ${{ steps.rootdir.outputs.rootdir }}
             # ls -la /github/works
             ls -la /github/workspace
+            ls -la $CITESTLIST
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
+            git config --global --add safe.directory /github/workspace/sources/citestlist
             cd sources/nuttx/tools/ci
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
