@@ -103,7 +103,7 @@ jobs:
       DOCKER_BUILDKIT: 1
 
     # if: ${{ fromJson(needs.load-matrix.outputs.matrix) != '' }}
-    if: ${{ matrix.platform }} != 'linux'
+    if: matrix.platform != 'linux'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.load-matrix.outputs.matrix) }}
