@@ -22,7 +22,7 @@ jobs:
       - name: Read matrix from JSON file
         id: set-matrix
         run: |
-          MATRIX=$(cat ./citest/matrix.json | jq -c .)
+          MATRIX=$(cat ./citestlist/matrix.json | jq -c .)
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           echo "Loaded matrix:"
           echo "$MATRIX" | jq .
