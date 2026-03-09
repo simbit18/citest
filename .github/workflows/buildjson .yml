@@ -98,12 +98,11 @@ jobs:
   build-linux:
     name: "Linux | ${{ matrix.arch }} | ${{ matrix.boards }}"
     needs: load-matrix
-    if: ${{ needs.load-matrix.outputs.matrix.platform != 'linux' }}
+    if: ${{ fromJson(needs.load-matrix.outputs.matrix) != '' }}
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
 
-    if: ${{ fromJson(needs.load-matrix.outputs.matrix) != '' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.load-matrix.outputs.matrix) }}
