@@ -95,6 +95,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   # Job 2 – Build (Linux runners)
   # ─────────────────────────────────────────────────────────────
+  if: ${{ matrix.platform != 'linux' }}
   build-linux:
     name: "Linux | ${{ matrix.arch }} | ${{ matrix.boards }}"
     needs: load-matrix
