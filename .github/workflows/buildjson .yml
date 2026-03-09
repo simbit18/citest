@@ -51,7 +51,7 @@ jobs:
       - name: Copy dat
         uses: actions/checkout@v6
         with:
-          path: sources/citestlist
+          path: sources
           sparse-checkout: |
              citestlist
           sparse-checkout-cone-mode: false
