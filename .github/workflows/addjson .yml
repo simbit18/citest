@@ -1,0 +1,134 @@
+name: Json
+
+on:
+  workflow_dispatch:
+    inputs:
+      search_key:
+        description: 'Key to search in JSON (e.g. "os")'
+        required: true
+        default: 'platform'
+      search_value:
+        description: 'Value to find (e.g. "linux")'
+        required: true
+        default: 'linux'
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/addjson.yml'
+env:
+   REPO_NUTTX_NAME: apache/nuttx
+   REF_NUTTX_NAME: master
+   REPO_APPS_NAME: apache/nuttx-apps
+   REF_APPS_NAME: master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.event.pull_request.number }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  find-item:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout repo ───────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # ── 2. Create a sample JSON file (remove this if you have your own) ────
+      - name: Create sample data.json
+        run: |
+          cat > data/items.json << 'EOF'
+          [
+            { "os": "ubuntu-latest",  "platform": "linux",  "arch": "arm",     "boards": "arm-15" },
+            { "os": "ubuntu-latest",  "platform": "linux",  "arch": "xtensa",  "boards": "arm-16" },
+            { "os": "ubuntu-latest",  "platform": "linux",  "arch": "sim",     "boards": "sim-04" },
+            { "os": "macos-15-intel", "platform": "macos",  "arch": "arm",     "boards": "macos-01" },
+            { "os": "windows-latest", "platform": "msys2",  "arch": "risc-v",  "boards": "msys2-01" },
+            { "os": "windows-latest", "platform": "msvc",   "arch": "xtensa",  "boards": "windowos" }
+          ]
+}
+          EOF
+
+      # ── 3. Validate JSON ───────────────────────────────────────────────────
+      - name: Validate JSON file
+        run: |
+          FILE="data/items.json"
+          if ! jq empty "$FILE" 2>/dev/null; then
+            echo "❌ Invalid JSON: $FILE"
+            exit 1
+          fi
+          echo "✅ JSON is valid"
+          echo "Total items: $(jq 'length' "$FILE")"
+
+      # ── 4. Find items using jq ─────────────────────────────────────────────
+      - name: Find matching items
+        id: find
+        run: |
+          FILE="data/items.json"
+          KEY="${{ github.event.inputs.search_key || 'platform' }}"
+          VALUE="${{ github.event.inputs.search_value || 'linux' }}"
+
+          echo "🔍 Searching for: .$KEY == \"$VALUE\""
+
+          # Find all matches
+          MATCHES=$(jq --arg key "$KEY" --arg val "$VALUE" \
+            '[.[] | select(.[$key] == $val)]' "$FILE")
+
+          COUNT=$(echo "$MATCHES" | jq 'length')
+
+          echo "Found $COUNT match(es):"
+          echo "$MATCHES" | jq '.'
+
+          # Export for downstream steps
+          echo "count=$COUNT"                       >> "$GITHUB_OUTPUT"
+          echo "matches<<EOF"                       >> "$GITHUB_OUTPUT"
+          echo "$MATCHES"                           >> "$GITHUB_OUTPUT"
+          echo "EOF"                                >> "$GITHUB_OUTPUT"
+
+      # ── 5. Use the results ─────────────────────────────────────────────────
+      - name: Process results
+        run: |
+          COUNT="${{ steps.find.outputs.count }}"
+          MATCHES='${{ steps.find.outputs.matches }}'
+
+          if [[ "$COUNT" -eq 0 ]]; then
+            echo "⚠️  No items found."
+            exit 0
+          fi
+
+          echo "✅ Processing $COUNT item(s)..."
+
+          # Loop over each match with jq + bash
+          echo "$MATCHES" | jq -c '.[]' | while read -r item; do
+            ID=$(echo "$item"   | jq -r '.os')
+            NAME=$(echo "$item" | jq -r '.platform')
+            ROLE=$(echo "$item" | jq -r '.boards')
+            echo "  → id=$ID  name=$NAME  role=$ROLE"
+          done
+
+      # ── 6. (Optional) Extract a single field from first result ─────────────
+      - name: Get first match role
+        if: steps.find.outputs.count != '0'
+        run: |
+          FIRST_ROLE=$(echo '${{ steps.find.outputs.matches }}' \
+            | jq -r '.[0].boards')
+          echo "First match role: $FIRST_ROLE"
+
+      # ── 7. Upload JSON result as artifact ──────────────────────────────────
+      - name: Save result to file
+        run: |
+          echo '${{ steps.find.outputs.matches }}' \
+            | jq '.' > result.json
+          echo "Saved result.json"
+
+      - name: Upload result artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: search-result
+          path: result.json
