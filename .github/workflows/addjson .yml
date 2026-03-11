@@ -52,7 +52,6 @@ jobs:
             { "os": "windows-latest", "platform": "msys2",  "arch": "risc-v",  "boards": "msys2-01" },
             { "os": "windows-latest", "platform": "msvc",   "arch": "xtensa",  "boards": "windowos" }
           ]
-}
           EOF
 
       # ── 3. Validate JSON ───────────────────────────────────────────────────
