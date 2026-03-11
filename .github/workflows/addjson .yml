@@ -11,9 +11,6 @@ on:
         description: 'Value to find (e.g. "linux")'
         required: true
         default: 'linux'
-
-on:
-  workflow_dispatch:
   push:
     paths:
       - '.github/workflows/addjson.yml'
