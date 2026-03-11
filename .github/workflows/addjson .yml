@@ -36,6 +36,8 @@ jobs:
       # ── 1. Checkout repo ───────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          path: data
 
       # ── 2. Create a sample JSON file (remove this if you have your own) ────
       - name: Create sample data.json
