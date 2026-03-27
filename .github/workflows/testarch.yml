@@ -21,7 +21,7 @@ on:
 
       jobs-arch:
         description: Make a choice
-        type: choice
+        type: multi-choice
         options:
         - arm
         - arm64
