@@ -26,8 +26,6 @@ on:
         - arm
         - arm64
         - other
-        default: arm
- 
 
 concurrency:
   group: build-man-${{ github.event.pull_request.number || github.ref }}
