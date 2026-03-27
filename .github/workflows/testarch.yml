@@ -90,10 +90,12 @@ jobs:
           COUNT=$(echo "$MATCHES" | jq 'length')
 
           echo "Found $COUNT match(es):"
+          MATRIX=$(echo "$MATCHES" | jq .)
           # echo "$MATCHES" | jq '.'
-          MATRIX=$("$MATCHES" | jq -c .)
-          echo "$MATCHES" | jq .
-          echo "matrix=$MATCHES"               >> $GITHUB_OUTPUT
+          # MATRIX=$("$MATCHES" | jq -c .)
+          echo "$MATCHES" | jq '.'
+          echo "$MATRIX" | jq '.'
+          echo "matrix=$MATRIX"               >> $GITHUB_OUTPUT
           # Export for downstream steps
           echo "count=$COUNT"                 >> "$GITHUB_OUTPUT"
           # echo "matrix=$MATCHES"              >> "$GITHUB_OUTPUT"
