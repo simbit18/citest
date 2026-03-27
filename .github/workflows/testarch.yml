@@ -90,7 +90,7 @@ jobs:
           COUNT=$(echo "$MATCHES" | jq 'length')
 
           echo "Found $COUNT match(es):"
-          MATRIX=$(echo "$MATCHES" | jq .)
+          MATRIX=$(echo "$MATCHES" | jq -rc .)
           # echo "$MATCHES" | jq '.'
           # MATRIX=$("$MATCHES" | jq -c .)
           echo "$MATCHES" | jq '.'
