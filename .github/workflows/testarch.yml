@@ -85,7 +85,7 @@ jobs:
           # Find all matches
           # MATCHES=$(jq --arg key "$KEY" --arg val "$VALUE" \
             # '[.[] | select(.[$key] == $val)]' "$FILE")
-          MATCHES=$(jq '[.[] | select(test("$KEY"))]' "$FILE")
+          MATCHES=$(jq '[.[] | select(test("arm"))]' "$FILE")
           COUNT=$(echo "$MATCHES" | jq 'length')
 
           echo "Found $COUNT match(es):"
