@@ -96,3 +96,14 @@ jobs:
           echo "matches<<EOF"                       >> "$GITHUB_OUTPUT"
           echo "$MATCHES"                           >> "$GITHUB_OUTPUT"
           echo "EOF"                                >> "$GITHUB_OUTPUT"
+  # Run the selected Linux Builds
+  Linux:
+    needs: find-item
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        boards: ${{ fromJSON(needs.find-item.outputs.matches) }}
+    steps:
+      - name: Show Disk Space
+        run: df -h
