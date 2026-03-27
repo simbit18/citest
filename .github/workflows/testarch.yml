@@ -56,8 +56,7 @@ jobs:
             "repo_2": ${{ github.event.inputs.repo_2 }},
             "repo_3": ${{ github.event.inputs.repo_3 }}
           }' 
-          | echo "repos=$( jq -c 'map_values(. // empty) | keys' )"
-          >> $GITHUB_OUTPUT
+          echo "repos=$( jq -c 'map_values(. // empty) | keys' )" >> $GITHUB_OUTPUT
   job2:
     needs: Fetch-Source
     runs-on: ubuntu-latest
