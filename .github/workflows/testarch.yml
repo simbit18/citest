@@ -51,3 +51,18 @@ jobs:
         shell: bash
         run: |
           echo "Matrix arch: ${{ inputs.jobs-arch }}"
+          echo '{
+            "repo_1": ${{ github.event.inputs.repo_1 }},
+            "repo_2": ${{ github.event.inputs.repo_2 }},
+            "repo_3": ${{ github.event.inputs.repo_3 }}
+          }' 
+          | echo "repos=$( jq -c 'map_values(. // empty) | keys' )"
+          >> $GITHUB_OUTPUT
+  job2:
+    needs: Fetch-Source
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ${{ fromJSON(needs.Fetch-Source.outputs.repos) }}
+    steps:
+      - run: echo ${{ matrix.repo }}
