@@ -92,10 +92,12 @@ jobs:
           echo "$MATCHES" | jq '.'
 
           # Export for downstream steps
-          echo "count=$COUNT"                       >> "$GITHUB_OUTPUT"
-          echo "matches<<EOF"                       >> "$GITHUB_OUTPUT"
-          echo "$MATCHES"                           >> "$GITHUB_OUTPUT"
-          echo "EOF"                                >> "$GITHUB_OUTPUT"
+          echo "count=$COUNT"                 >> "$GITHUB_OUTPUT"
+          echo "matrix=$MATCHES"              >> $GITHUB_OUTPUT
+          # echo "matches<<EOF"               >> "$GITHUB_OUTPUT"
+          #echo "$MATCHES"                    >> "$GITHUB_OUTPUT"
+          # echo "EOF"                        >> "$GITHUB_OUTPUT"
+ 
   # Run the selected Linux Builds
   Linux:
     needs: find-item
@@ -103,7 +105,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        boards: ${{ fromJSON(needs.find-item.outputs.matches) }}
+        boards: ${{ fromJSON(needs.find-item.outputs.matrix) }}
     steps:
       - name: Show Disk Space
         run: df -h
