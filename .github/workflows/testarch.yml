@@ -72,27 +72,27 @@ jobs:
           echo "✅ JSON is valid"
           echo "Total items: $(jq 'length' "$FILE")"
 
-      # # ── 4. Find items using jq ─────────────────────────────────────────────
-      # - name: Find matching items
-        # id: find
-        # run: |
-          # FILE="data/items.json"
-          # KEY="${{ github.event.inputs.search_key || 'platform' }}"
+      # ── 4. Find items using jq ─────────────────────────────────────────────
+      - name: Find matching items
+        id: find
+        run: |
+          FILE="data/items.json"
+          KEY="${{ github.event.inputs.jobs-arch || 'all' }}"
           # VALUE="${{ github.event.inputs.search_value || 'linux' }}"
 
-          # echo "🔍 Searching for: .$KEY == \"$VALUE\""
+          echo "🔍 Searching for: $KEY"
 
-          # # Find all matches
+          # Find all matches
           # MATCHES=$(jq --arg key "$KEY" --arg val "$VALUE" \
             # '[.[] | select(.[$key] == $val)]' "$FILE")
+          MATCHES=$(jq '[.[] | select(contains("$KEY"))]' "$FILE")
+          COUNT=$(echo "$MATCHES" | jq 'length')
 
-          # COUNT=$(echo "$MATCHES" | jq 'length')
+          echo "Found $COUNT match(es):"
+          echo "$MATCHES" | jq '.'
 
-          # echo "Found $COUNT match(es):"
-          # echo "$MATCHES" | jq '.'
-
-          # # Export for downstream steps
-          # echo "count=$COUNT"                       >> "$GITHUB_OUTPUT"
-          # echo "matches<<EOF"                       >> "$GITHUB_OUTPUT"
-          # echo "$MATCHES"                           >> "$GITHUB_OUTPUT"
-          # echo "EOF"                                >> "$GITHUB_OUTPUT"
+          # Export for downstream steps
+          echo "count=$COUNT"                       >> "$GITHUB_OUTPUT"
+          echo "matches<<EOF"                       >> "$GITHUB_OUTPUT"
+          echo "$MATCHES"                           >> "$GITHUB_OUTPUT"
+          echo "EOF"                                >> "$GITHUB_OUTPUT"
