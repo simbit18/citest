@@ -21,11 +21,18 @@ on:
 
       jobs-arch:
         description: Make a choice
-        type: multi-choice
+        type: choice
         options:
         - arm
         - arm64
         - other
+
+      build:
+        description: "Include build"
+        type: choice
+        options: ["yes", "no"]
+        default: "no"
+
       repo_1:
         type: boolean
         default: false
