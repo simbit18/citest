@@ -90,7 +90,7 @@ jobs:
 
           echo "Found $COUNT match(es):"
           # echo "$MATCHES" | jq '.'
-          MATRIX=$("$MATCHES" | jq -c .)
+          MATRIX=$("$MATCHES" | jq .)
           echo "matrix=$MATRIX"               >> $GITHUB_OUTPUT
           # Export for downstream steps
           echo "count=$COUNT"                 >> "$GITHUB_OUTPUT"
