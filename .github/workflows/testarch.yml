@@ -38,8 +38,8 @@ concurrency:
 jobs:
   find-item:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    #outputs:
+     # matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       # ── 1. Checkout repo ───────────────────────────────────────────────────
       - name: Checkout repository
@@ -95,7 +95,7 @@ jobs:
           # MATRIX=$("$MATCHES" | jq -c .)
           echo "$MATCHES" | jq '.'
           echo "$MATRIX" | jq -rc '.'
-          echo "matrix=$MATRIX"               >> $GITHUB_OUTPUT
+          echo "matrix=$MATRIX"               >> "$GITHUB_OUTPUT"
           # Export for downstream steps
           echo "count=$COUNT"                 >> "$GITHUB_OUTPUT"
           # echo "matrix=$MATCHES"              >> "$GITHUB_OUTPUT"
