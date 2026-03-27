@@ -81,7 +81,7 @@ jobs:
           # VALUE="${{ github.event.inputs.search_value || 'linux' }}"
 
           echo "🔍 Searching for: $KEY"
-          echo "$FILE" | jq '.'
+          echo $(jq '.' "$FILE")
           # Find all matches
           # MATCHES=$(jq --arg key "$KEY" --arg val "$VALUE" \
             # '[.[] | select(.[$key] == $val)]' "$FILE")
