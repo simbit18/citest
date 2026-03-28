@@ -23,7 +23,7 @@ on:
         description: Make a choice
         type: choice
         options:
-        - arm-
+        - arm
         - arm64
         - other
         - risc-v
@@ -86,7 +86,12 @@ jobs:
           # Find all matches
           # MATCHES=$(jq --arg key "$KEY" --arg val "$VALUE" \
             # '[.[] | select(.[$key] == $val)]' "$FILE")
-          MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}"))]' "$FILE")
+
+          if [[ "${{ github.event.inputs.jobs-arch }}" == "arm"; then
+            MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}-"))]' "$FILE")
+          else
+            MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}"))]' "$FILE")
+          fi
           COUNT=$(echo "$MATCHES" | jq 'length')
 
           echo "Found $COUNT match(es):"
@@ -96,7 +101,7 @@ jobs:
           echo "$MATCHES" | jq '.'
           echo "$MATRIX" | jq -rc '.'
           # echo "matrix=$MATRIX"               >> "$GITHUB_OUTPUT"
-          
+
           # Export for downstream steps
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
           echo "count=$COUNT"                 >> "$GITHUB_OUTPUT"
