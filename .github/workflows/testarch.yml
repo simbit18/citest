@@ -23,13 +23,15 @@ on:
         description: Make a choice
         type: choice
         options:
-        - arm
-        - arm64
-        - other
-        - risc-v
-        - sim
-        - x86_64
-        - xtensa
+          - arm
+          - arm64
+          - other
+          - risc-v
+          - sim
+          - x86_64
+          - xtensa
+          - all
+        default: all
 
 concurrency:
   group: build-man-${{ github.event.pull_request.number || github.ref }}
@@ -54,7 +56,7 @@ jobs:
           [
             "arm-01", "risc-v-01", "sim-01", "xtensa-01", "arm64-01", "x86_64-01", "other",
             "arm-02", "risc-v-02", "sim-02", "xtensa-02",
-            "arm-03", "risc-v-03", "sim-03",
+            "arm-03", "risc-v-03", "sim-03", "xtensa-03",
             "arm-04", "risc-v-04",
             "arm-05", "risc-v-05",
             "arm-06", "risc-v-06",
@@ -87,13 +89,27 @@ jobs:
           # MATCHES=$(jq --arg key "$KEY" --arg val "$VALUE" \
             # '[.[] | select(.[$key] == $val)]' "$FILE")
 
-          if [[ "${{ github.event.inputs.jobs-arch }}" == "arm" ]]; then
-            MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}-"))]' "$FILE")
-          else
-            MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}"))]' "$FILE")
-          fi
+          # if [[ "${{ github.event.inputs.jobs-arch }}" == "arm" ]]; then
+            # MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}-"))]' "$FILE")
+          # else
+            # MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}"))]' "$FILE")
+          # fi
+          
           COUNT=$(echo "$MATCHES" | jq 'length')
-
+          
+          case "${{ github.event.inputs.jobs-arch }}" in
+            all)
+              MATCHES=$(jq '[.[]]' "$FILE")
+              ;;
+            arm)
+              MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}-"))]' "$FILE")
+              ;;
+            *)
+              MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}"))]' "$FILE")
+              ;;
+          esac
+          
+          MATRIX=$(echo "$MATCHES" | jq -rc .)
           echo "Found $COUNT match(es):"
           MATRIX=$(echo "$MATCHES" | jq -rc .)
           # echo "$MATCHES" | jq '.'
