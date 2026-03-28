@@ -87,7 +87,7 @@ jobs:
           # MATCHES=$(jq --arg key "$KEY" --arg val "$VALUE" \
             # '[.[] | select(.[$key] == $val)]' "$FILE")
 
-          if [[ "${{ github.event.inputs.jobs-arch }}" == "arm"; then
+          if [[ "${{ github.event.inputs.jobs-arch }}" == "arm" ]]; then
             MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}-"))]' "$FILE")
           else
             MATCHES=$(jq '[.[] | select(test("${{ github.event.inputs.jobs-arch }}"))]' "$FILE")
